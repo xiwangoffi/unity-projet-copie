@@ -120,13 +120,8 @@ public class Player : MonoBehaviour
         if(collision.gameObject.layer == 6)
         {
             Debug.Log(_hp);
-            if (Damage.instance.IsInvincible == false)
-            {
-                Damage.instance.IsInvincible = true;
-                Damage.instance.DamagePlayer(1);
-                StartCoroutine(Damage.instance.Invincibility());
-            }
-            else return;
+            Damage.instance.IsInvincible = false;
+            Damage.instance.DamagePlayer(1);
         }
     }
 
@@ -139,7 +134,7 @@ public class Player : MonoBehaviour
 
     public void Knock()
     {
-        _rb2d.AddForce(new Vector2(knockBackValue, 5f), ForceMode2D.Impulse);
+        _rb2d.AddForce(new Vector2(knockBackValue, 25f), ForceMode2D.Impulse);
         currentKnockBack = knockBackValue;
     }
 

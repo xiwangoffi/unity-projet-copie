@@ -7,23 +7,25 @@ public class Ennemies : MonoBehaviour
 {
     private Animator _animator;
     public Player _player;
+    public int _hp;
     private GameObject _attackArea = default;
     private float _attackRange = 2f;
     private float _attackAngle = 30f;
     private LayerMask _playerLayer;
-    private float startPos;
-    private float endPos;
-    private float speed = 5f;
-    private bool movingForward = true;
-    private bool isPlayerInFront = false;
+    private float _startPos;
+    private float _endPos;
+    private float _speed = 5f;
+    private bool _movingForward = true;
+    private bool _isPlayerInFront = false;
+    private bool _isAttacking = false;
     private bool _walk;
     void Start()
     {
         _animator = GetComponent<Animator>();
         _attackArea = transform.GetChild(0).gameObject;
         _playerLayer = LayerMask.GetMask("Player");
-        startPos = transform.position.x;
-        endPos = startPos + 10f;
+        _startPos = transform.position.x;
+        _endPos = _startPos + 10f;
         _walk = true;
     }
     void FixedUpdate()
@@ -37,42 +39,36 @@ public class Ennemies : MonoBehaviour
             Vector2 forwardDirection = transform.right;
             if (Vector2.Dot(directionToPlayer.normalized, forwardDirection) > Mathf.Cos(_attackAngle * Mathf.Deg2Rad))
             {
-                isPlayerInFront = true;
+                _isPlayerInFront = true;
                 break;
             }
         }
 
-        if(colliders.Length > 0 && isPlayerInFront)
+        if(colliders.Length > 0 && _isPlayerInFront && _isAttacking == false)
         {
             _walk = false;
-            _player.Side = movingForward ? 1f : -1f;
-            _animator.SetTrigger("Attack");
+            _player.Side = _movingForward ? 1f : -1f;
             Walk(_walk);
             StartCoroutine(PlayAttack());
-            _attackArea.SetActive(true);
-        }
-        else
-        {
-            _attackArea.SetActive(false);
         }
 
-        if(movingForward == true && _walk == true)
+        if(_movingForward == true && _walk == true)
         {
-            transform.position = Vector2.MoveTowards(transform.position, new Vector2(endPos, transform.position.y), speed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, new Vector2(_endPos, transform.position.y), _speed * Time.deltaTime);
 
-            if(transform.position.x >= endPos)
+            if(transform.position.x >= _endPos)
             {
-                movingForward = false;
+                _movingForward = false;
                 Utils.Flip2D_Object(gameObject, 0f, 180f);
             }
         }
-        else if(movingForward == false && _walk == true)
+        else if(_movingForward == false && _walk == true)
         {
-            transform.position = Vector2.MoveTowards(transform.position, new Vector2(startPos, transform.position.y), speed * Time.deltaTime);
+            transform.position = Vector2.MoveTowards(transform.position, new Vector2(_startPos, transform.position.y), _speed * Time.deltaTime);
             
-            if(transform.position.x <= startPos)
+            if(transform.position.x <= _startPos)
             {
-                movingForward = true;
+                _movingForward = true;
                 Utils.Flip2D_Object(gameObject);
             }
         }
@@ -80,10 +76,11 @@ public class Ennemies : MonoBehaviour
 
     private IEnumerator PlayAttack()
     {
+        _isAttacking = true;
         _animator.SetTrigger("Attack");
         yield return new WaitForSeconds(0.5f);
-        _attackArea.SetActive(false);
         _walk = true;
+        _isAttacking = false;
     }
 
     private void Walk(bool value)

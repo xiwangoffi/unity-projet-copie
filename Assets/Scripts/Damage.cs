@@ -6,7 +6,7 @@ public class Damage : MonoBehaviour
 {
     public static Damage instance;
     public Player _player;
-    private bool isInvincible = false;
+    private bool _isInvincible = false;
     private Animator animator;
 
 
@@ -17,19 +17,26 @@ public class Damage : MonoBehaviour
 
     public Animator Animator { set =>  animator = value; }
 
-    public bool IsInvincible { get { return isInvincible; } set => isInvincible = value; }
+    public bool IsInvincible { get { return _isInvincible; } set => _isInvincible = value; }
 
     public void DamagePlayer(int amount)
     {
-        animator.SetBool("isHurted", true);
-        _player._hp -= amount;
-        _player.Knock();
+        if (_isInvincible == false)
+        {
+            _isInvincible = true;
+            animator.SetBool("isHurted", true);
+            _player._hp -= amount;
+            StartCoroutine(Invincibility());
+            _player.Knock();
+        }
+        else return;
     }
 
     public IEnumerator Invincibility()
     {
+        print("je suis invincible");
         yield return new WaitForSeconds(1.5f);
-        isInvincible = false;
+        _isInvincible = false;
         animator.SetBool("isHurted", false);
     }
 }
